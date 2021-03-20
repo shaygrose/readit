@@ -10,7 +10,7 @@
   <body>
     <nav class="navbar" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="reviews.html">
+        <a class="navbar-item" href="index.html">
           <span class="material-icons">class</span>  readit 
         </a>
     
@@ -58,48 +58,48 @@
         <div class='field'>
           <label class='label'>Book title</label>
           <div class="control">
-            <input class="input" type="text">
+            <input id="title" class="input" type="text">
           </div>
         </div>
         
         <div class='field'>
           <label class="label">ISBN</label>
           <div class="control">
-            <input class="input" type="text" placeholder="10 or 13 digit identifier">
+            <input id="isbn" class="input" type="text" placeholder="10 or 13 digit identifier">
           </div>
         </div>
         
         <div class="field">
           <label class="label">Genre(s)</label>
           <div class="control">
-            <input class="input" type="text" placeholder="horror, romance, sci-fi, etc.">
+            <input id="genre" class="input" type="text" placeholder="horror, romance, sci-fi, etc.">
           </div>
         </div>
 
         <div class="field">
           <label class="label">Review title</label>
           <div class="control">
-            <input class="input" placeholder="E.g. 'I loved it!'">
+            <input id="review_title" class="input" placeholder="E.g. 'I loved it!'">
           </div>
         </div>
         
         <div class="field">
           <label class="label">Review</label>
           <div class="control">
-            <textarea class="textarea" placeholder="Tell us more about the book ..."></textarea>
+            <textarea id="review" class="textarea" placeholder="Tell us more about the book ..."></textarea>
           </div>
         </div>
 
         <div class="field">
           <div class="control">
             <label class="checkbox">
-              <input type="checkbox">
+              <input id="spoilers" type="checkbox">
               Contains spoilers
             </label>
           </div>
           <div class="control">
             <label class="checkbox">
-              <input type="checkbox">
+              <input id="NSFW" type="checkbox">
               NSFW content
             </label>
           </div>
@@ -107,7 +107,8 @@
         
         <div class="field is-grouped">
           <div class="control">
-            <button class="button is-link">Submit</button>
+            <button class="button is-link" onclick="callAPI(document.getElementById('title').value,document.getElementById('isbn').value,document.getElementById('genre').value,document.getElementById('review_title').value,
+                                                            document.getElementById('review').value,document.getElementById('spoilers').checked,document.getElementById('NSFW').checked)">Submit</button>
           </div>
         </div>
       </div>
@@ -128,3 +129,27 @@
   </section>
   </body>
 </html>
+
+<script>
+  // define the callAPI function that takes a first name and last name as parameters
+  var callAPI = (title,isbn,genre,review_title,review,spoilers,NSFW)=>{
+      // instantiate a headers object
+      var myHeaders = new Headers();
+      // add content type header to object
+      myHeaders.append("Content-Type", "application/json");
+      // using built in JSON utility package turn object to string and store in a variable
+      var raw = JSON.stringify({"book_title":title,"ISBN":isbn,"genres":genre,"review_title":review_title,"review":review,"contains_spoilers":spoilers,"NSFW_content":NSFW});
+      // create a JSON object with parameters for API call and store in a variable
+      var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: raw,
+          redirect: 'follow'
+      };
+      // make API call with parameters and use promises to get response
+      fetch("https://r4atlqcosh.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
+      .then(response => response.text())
+      .then(()=>window.location = "./index.html")
+      .catch(error => console.log('error', error));
+  }
+</script>
