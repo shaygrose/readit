@@ -80,43 +80,64 @@
 </html>
 
 <script>
-
   window.onload = function() {
     callGET();
   };
 
-
   // function that calls GET and loads all reviews
-  var callGET = ()=>{
+  var callGET = () => {
 
     var myHeaders = new Headers();
-      // add content type header to object
+
+    // Add content type header to object
     myHeaders.append("Content-Type", "application/json");
     var requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          redirect: 'follow'
-      };
-    fetch("https://ymzw4hyvpe.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
-        // .then(response => console.log(response))
-        .then((resp) => resp.json())
-        .then(data => displayReviews(data))
-        .catch(error => console.log('error', error));
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    };
+    
+    fetch("https://smhznnsms7.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
+      .then((resp) => resp.json())
+      .then(data => displayReviews(data))
+      .catch(error => console.log('error', error));
+  }
 
+  function displayReviews(reviews) {
+      var div = document.getElementById('review-list')
 
-          }
+      reviews.body.forEach(function(review) {
+        let NSFWContentTag, spoilerTag;
+        NSFWContentTag = review.NSFW_content ? `<span class="tag is-danger">NSFW</span>` : `<span class="tag is-danger" style='display: none;'>NSFW</span>`;
+        spoilerTag = review.contains_spoilers ? `<span class="tag is-black">Spoilers</span>` : `<span class="tag is-black" style='display: none;>Spoilers</span>`;
 
-function displayReviews(reviews) {
-    var div = document.getElementById('review-list')
-    // var parsedJSON = JSON.parse(reviews.d);
-    //    for (var i=0;i<parsedJSON.length;i++) {
-    //         console.log(parsedJSON[i].book_title);
-    //      }
-    // console.log(reviews)
-    reviews.body.forEach(function(review){
-                div.innerHTML +=
-                  '<article class="media"><div class="mr-2"><a class="navbar-item"><span class="material-icons">arrow_circle_up</span></a><div style="text-align: center;"><span id="upvotes" >99.9k</span></div><a class="navbar-item"><span class="material-icons">arrow_circle_down</span></a></div><div class="media-content"><div class="content"><div id="review-title"> <strong>' + review.review_title +'</strong> </div><div id="book-title">' + review.book_title + ' <small> <i></i></small></div><div id="review"> '+ review.review +'</div></div></div></article>'
-                
-            })
-}
+        div.innerHTML +=
+          `<article class="media">
+            <div class="mr-2">
+              <a class="navbar-item">
+                <span class="material-icons">arrow_circle_up</span>
+              </a>
+              <div style="text-align: center;">
+                <span id="upvotes" >99.9k</span>
+              </div>
+              <a class="navbar-item">
+                <span class="material-icons">arrow_circle_down</span>
+              </a>
+            </div>
+            <div class="media-content">
+              <div class="content">
+                <div id="review-title"> 
+                  <strong> ${review.review_title} </strong> 
+                </div>
+                <div id="book-title"> 
+                  <small><i> ${review.book_title} </i></small>
+                </div>
+                <div id="review"> ${review.review} </div>
+              </div>
+              ${NSFWContentTag}
+              ${spoilerTag}
+            </div>
+          </article>`
+      })
+  }
 </script>
