@@ -35,121 +35,107 @@
           </div>
         </div>
     
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons">
-              <a class="button is-light">
-                Log in
-              </a>
-              <a class="button is-primary">
-                <strong>Sign up</strong>
-              </a>
-            </div>
-          </div>
-        </div>
+        <!-- Sign in/Sign up buttons, or email of signed-in user -->
+        <div class="navbar-end" id="navbar-account"></div>
+
       </div>
     </nav>
-  <section class="columns">
-    <div class="container column is-three-quarters mt-6 ml-6">
-      <h1 class="title">
-        Create a book review
-      </h1>
-      <div id='form'>
-        <div class='field'>
-          <label class='label'>Book title</label>
-          <div class="control">
-            <input id="title" class="input" type="text">
+    <section class="columns">
+      <div class="container column is-three-quarters mt-6 ml-6">
+        <h1 class="title">
+          Create a book review
+        </h1>
+        <div id='form'>
+          <div class='field'>
+            <label class='label'>Book title</label>
+            <div class="control">
+              <input id="title" class="input" type="text">
+            </div>
           </div>
-        </div>
-        
-        <div class='field'>
-          <label class="label">ISBN</label>
-          <div class="control">
-            <input id="isbn" class="input" type="text" placeholder="10 or 13 digit identifier">
+          
+          <div class='field'>
+            <label class="label">ISBN</label>
+            <div class="control">
+              <input id="isbn" class="input" type="text" placeholder="10 or 13 digit identifier">
+            </div>
           </div>
-        </div>
-        
-        <div class="field">
-          <label class="label">Genre(s)</label>
-          <div class="control">
-            <input id="genre" class="input" type="text" placeholder="horror, romance, sci-fi, etc.">
+          
+          <div class="field">
+            <label class="label">Genre(s)</label>
+            <div class="control">
+              <input id="genre" class="input" type="text" placeholder="horror, romance, sci-fi, etc.">
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="label">Review title</label>
-          <div class="control">
-            <input id="review_title" class="input" placeholder="E.g. 'I loved it!'">
+          <div class="field">
+            <label class="label">Review title</label>
+            <div class="control">
+              <input id="review_title" class="input" placeholder="E.g. 'I loved it!'">
+            </div>
           </div>
-        </div>
-        
-        <div class="field">
-          <label class="label">Review</label>
-          <div class="control">
-            <textarea id="review" class="textarea" placeholder="Tell us more about the book ..."></textarea>
+          
+          <div class="field">
+            <label class="label">Review</label>
+            <div class="control">
+              <textarea id="review" class="textarea" placeholder="Tell us more about the book ..."></textarea>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <div class="control">
-            <label class="checkbox">
-              <input id="spoilers" type="checkbox">
-              Contains spoilers
-            </label>
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input id="spoilers" type="checkbox">
+                Contains spoilers
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox">
+                <input id="NSFW" type="checkbox">
+                NSFW content
+              </label>
+            </div>
           </div>
-          <div class="control">
-            <label class="checkbox">
-              <input id="NSFW" type="checkbox">
-              NSFW content
-            </label>
+          
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-link" id='submit'>Submit</button>
+            </div>
           </div>
-        </div>
-        
-        <div class="field is-grouped">
-          <div class="control">
-            <button class="button is-link" onclick="callAPI(document.getElementById('title').value,document.getElementById('isbn').value,document.getElementById('genre').value,document.getElementById('review_title').value,
-                                                            document.getElementById('review').value,document.getElementById('spoilers').checked,document.getElementById('NSFW').checked)">Submit</button>
+
+          <div class="modal" id='modal'>
+            <div class="modal-background"></div>
+            <div class="modal-content">
+              <div class='box'>
+                You must be logged in to submit a review.
+                <div class='buttons'>
+                  <a class="button is-light" id='sign-in-reminder'>
+                    Sign in
+                  </a>
+                  <a class="button is-primary" id='sign-up-reminder'>
+                    <strong>Sign up</strong>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <button class="modal-close is-large" id='modal-close' aria-label="close"></button>
           </div>
         </div>
       </div>
-    </div>
-    <div class="container column mt-6 mr-6">
-      <div class="box">
-        <p class="has-text-weight-bold">Rules</p>
-        <hr class="dropdown-divider">
-        <ol class="ml-3">
-          <li>Respect other readit users</li>
-          <li>Keep reviews on topic</li>
-          <li>Spam reviews will be removed</li>
-          <li>Self-promotion is prohibited</li>
-          <li>Posts must be your own</li>
-        </ol>
+      <div class="container column mt-6 mr-6">
+        <div class="box">
+          <p class="has-text-weight-bold">Rules</p>
+          <hr class="dropdown-divider">
+          <ol class="ml-3">
+            <li>Respect other readit users</li>
+            <li>Keep reviews on topic</li>
+            <li>Spam reviews will be removed</li>
+            <li>Self-promotion is prohibited</li>
+            <li>Posts must be your own</li>
+          </ol>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   </body>
 </html>
 
-<script>
-  // define the callAPI function that takes a first name and last name as parameters
-  var callAPI = (title,isbn,genre,review_title,review,spoilers,NSFW)=>{
-      // instantiate a headers object
-      var myHeaders = new Headers();
-      // add content type header to object
-      myHeaders.append("Content-Type", "application/json");
-      // using built in JSON utility package turn object to string and store in a variable
-      var raw = JSON.stringify({"book_title":title,"ISBN":isbn,"genres":genre,"review_title":review_title,"review":review,"contains_spoilers":spoilers,"NSFW_content":NSFW});
-      // create a JSON object with parameters for API call and store in a variable
-      var requestOptions = {
-          method: 'POST',
-          headers: myHeaders,
-          body: raw,
-          redirect: 'follow'
-      };
-      // make API call with parameters and use promises to get response
-      fetch("https://ymzw4hyvpe.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
-      .then(response => response.text())
-      .then(()=>window.location = "./index.html")
-      .catch(error => console.log('error', error));
-  }
-</script>
+<script src='js/review-form.js' type='module'></script>

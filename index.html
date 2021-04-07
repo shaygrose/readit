@@ -34,18 +34,10 @@
             </div>
           </div>
         </div>
-    
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons">
-              <a class="button is-light">
-                Log in
-              </a>
-              <a class="button is-primary">
-                <strong>Sign up</strong>
-              </a>
-            </div>
-          </div>
+        
+        <!-- Sign in/Sign up buttons, or email of signed-in user -->
+        <div class="navbar-end" id="navbar-account">
+          
         </div>
       </div>
     </nav>
@@ -55,12 +47,13 @@
         Top reviews
       </h1>
 
-      <div id="review-list"> 
-
-
+      <div class="column ml-6">
+        <a class="fa fa-angle-double-left mr-6" style="font-size:24px" href="javascript:prevPage()" id="btn_prev"></a>
+        <a class="fa fa-angle-double-right" style="font-size:24px" href="javascript:nextPage()" id="btn_next"></a>
       </div>
-      
 
+      <div id="review-list"> </div>
+      
     </div>
     <div class="container column mt-6 mr-6">
       <div class="box">
@@ -79,16 +72,49 @@
   </body>
 </html>
 
+<script src='js/index.js' type='module'></script>
 <script>
+  var data;
+  var current_page = 1;
+  var count;
+  var date;
+  var current_timestamp;
+
   window.onload = function() {
-    callGET();
+    processDate();
+    callGET(current_timestamp, "prev");
   };
 
+  function processDate()
+  {
+    date = new Date();
+
+    var month = '' + date.getMonth();
+    var day = '' + date.getDate();
+    var year = '' + date.getFullYear();
+    var hours = '' + date.getHours();
+    var minutes = '' + date.getMinutes();
+    var seconds = '' + date.getSeconds();
+
+    if (month.length < 2) 
+          month = '0' + month;
+    if (day.length < 2) 
+          day = '0' + day;
+    if (hours.length < 2) 
+          hours = '0' + hours;
+    if (minutes.length < 2) 
+          minutes = '0' + minutes;
+    if (seconds.length < 2) 
+          seconds = '0' + seconds;
+  
+    current_timestamp = year+month+day+hours+":"+minutes+":"+seconds;
+    console.log(current_timestamp);
+  }
+
   // function that calls GET and loads all reviews
-  var callGET = () => {
+  var callGET = (timestamp, direction) => {
 
     var myHeaders = new Headers();
-
     // Add content type header to object
     myHeaders.append("Content-Type", "application/json");
     var requestOptions = {
@@ -97,16 +123,95 @@
       redirect: 'follow'
     };
     
-    fetch("https://smhznnsms7.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
+  // CHANGE: to your API link
+    fetch(`https://smhznnsms7.execute-api.us-east-1.amazonaws.com/prod?timestamp=${timestamp}&direction=${direction}`, requestOptions)
       .then((resp) => resp.json())
-      .then(data => displayReviews(data))
+      .then(parsed => changePage(current_page, parsed))
       .catch(error => console.log('error', error));
   }
 
-  function displayReviews(reviews) {
+  function prevPage()
+{
+    if (current_page > 1) {
+        current_page--;
+        callGET(current_timestamp, "prev");
+    }
+}
+
+function nextPage()
+{
+    if (current_page < numPages(data.count)) {
+        current_page++;
+        callGET(current_timestamp, "next");
+    }
+}
+
+function changePage(page, reviews)
+{
+    console.log(reviews);
+
+    // Validate page
+    if (page < 1) page = 1;
+    
+    displayReviews(reviews, page);
+
+    if (page == 1) {
+        btn_prev.style.visibility = "hidden";
+    } else {
+        btn_prev.style.visibility = "visible";
+    }
+
+    if (page == numPages(reviews.count)) {
+        btn_next.style.visibility = "hidden";
+    } else {
+        btn_next.style.visibility = "visible";
+    }
+
+    data = reviews;
+    // console.log(data);
+}
+
+function numPages(count)
+{
+    return Math.ceil(count / 5);
+}
+
+// function upVote() {
+//     updateVote(vote_count+1);
+// }
+
+// function updateVote(title,isbn,genre,review_title,review,spoilers,NSFW,vote_count,timestamp) {
+//     // instantiate a headers object
+//     var myHeaders = new Headers();
+//       // add content type header to object
+//       myHeaders.append("Content-Type", "application/json");
+//       myHeaders.append('access-control-allow-origin', '*');
+//       myHeaders.append('access-control-allow-methods', 'POST');
+
+//       // using built in JSON utility package turn object to string and store in a variable
+//       var raw = JSON.stringify({"book_title":title,"ISBN":isbn,"genres":genre,"review_title":review_title,"review":review,"contains_spoilers":spoilers,"NSFW_content":NSFW, "upvotes":vote_count});
+//       // create a JSON object with parameters for API call and store in a variable
+//       var requestOptions = {
+//           method: 'POST',
+//           headers: myHeaders,
+//           body: raw,
+//           redirect: 'follow'
+//       };
+//       // make API call with parameters and use promises to get response
+//       fetch(`https://txmu2exmsh.execute-api.us-east-1.amazonaws.com/dev?=${timestamp}`, requestOptions)
+//       .then(response => response.text())
+//       .then(()=>window.location = "./index.html")
+//       .catch(error => console.log('error', error));
+//   }
+
+  function displayReviews(reviews, page) {
       var div = document.getElementById('review-list')
 
-      reviews.body.forEach(function(review) {
+      div.innerHTML = "";
+      // console.log("reviews in display", reviews);
+      let review;
+      for(var i = 0; i < (page * 5) && i < reviews.body.length; i++) {
+        review = reviews.body[i];
         let NSFWContentTag, spoilerTag;
         NSFWContentTag = review.NSFW_content ? `<span class="tag is-danger">NSFW</span>` : `<span class="tag is-danger" style='display: none;'>NSFW</span>`;
         spoilerTag = review.contains_spoilers ? `<span class="tag is-black">Spoilers</span>` : `<span class="tag is-black" style='display: none;>Spoilers</span>`;
@@ -115,13 +220,13 @@
           `<article class="media">
             <div class="mr-2">
               <a class="navbar-item">
-                <span class="material-icons">arrow_circle_up</span>
+                <span class="material-icons" onclick="updateVote(document.getElementById('book-title'), document.getElementById('upvotes'))">arrow_circle_up</span>
               </a>
               <div style="text-align: center;">
-                <span id="upvotes" >99.9k</span>
+                <span id="upvotes" >${review.upvotes}</span>
               </div>
               <a class="navbar-item">
-                <span class="material-icons">arrow_circle_down</span>
+                <span class="material-icons" onclick="updateVote(${review.book_title}, ${review.upvotes - 1})">arrow_circle_down</span>
               </a>
             </div>
             <div class="media-content">
@@ -138,6 +243,8 @@
               ${spoilerTag}
             </div>
           </article>`
-      })
+      }
+      console.log("Last review",review);
+      current_timestamp = review.timestamp;
   }
 </script>
