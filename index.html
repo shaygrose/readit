@@ -87,33 +87,39 @@
   var data;
   var current_page = 1;
   var count;
-  var date = new Date();
-
-  var month = '' + date.getMonth();
-  var day = '' + date.getDate();
-  var year = '' + date.getFullYear();
-  var hours = '' + date.getHours();
-  var minutes = '' + date.getMinutes();
-  var seconds = '' + date.getSeconds();
-
-
-  if (month.length < 2) 
-        month = '0' + month;
-  if (day.length < 2) 
-        day = '0' + day;
-  if (hours.length < 2) 
-        hours = '0' + hours;
-  if (minutes.length < 2) 
-        minutes = '0' + minutes;
-  if (seconds.length < 2) 
-        seconds = '0' + seconds;
-
-  var current_timestamp = year+month+day+hours+":"+minutes+":"+seconds;
-  console.log(current_timestamp)
+  var date;
+  var current_timestamp;
 
   window.onload = function() {
+    processDate();
     callGET(current_timestamp, "prev");
   };
+
+  function processDate()
+  {
+    date = new Date();
+
+    var month = '' + date.getMonth();
+    var day = '' + date.getDate();
+    var year = '' + date.getFullYear();
+    var hours = '' + date.getHours();
+    var minutes = '' + date.getMinutes();
+    var seconds = '' + date.getSeconds();
+
+    if (month.length < 2) 
+          month = '0' + month;
+    if (day.length < 2) 
+          day = '0' + day;
+    if (hours.length < 2) 
+          hours = '0' + hours;
+    if (minutes.length < 2) 
+          minutes = '0' + minutes;
+    if (seconds.length < 2) 
+          seconds = '0' + seconds;
+  
+    current_timestamp = year+month+day+hours+":"+minutes+":"+seconds;
+    console.log(current_timestamp);
+  }
 
   // function that calls GET and loads all reviews
   var callGET = (timestamp, direction) => {
@@ -127,7 +133,7 @@
       redirect: 'follow'
     };
     
-  
+  // CHANGE: to your API link
     fetch(`https://ymzw4hyvpe.execute-api.us-east-1.amazonaws.com/prod?timestamp=${timestamp}&direction=${direction}`, requestOptions)
       .then((resp) => resp.json())
       .then(parsed => changePage(current_page, parsed))
@@ -214,10 +220,8 @@ function numPages(count)
       div.innerHTML = "";
       // console.log("reviews in display", reviews);
       let review;
-      console.log(page);
       for(var i = 0; i < (page * 5) && i < reviews.body.length; i++) {
         review = reviews.body[i];
-        console.log("Review inside loop", review)
         let NSFWContentTag, spoilerTag;
         NSFWContentTag = review.NSFW_content ? `<span class="tag is-danger">NSFW</span>` : `<span class="tag is-danger" style='display: none;'>NSFW</span>`;
         spoilerTag = review.contains_spoilers ? `<span class="tag is-black">Spoilers</span>` : `<span class="tag is-black" style='display: none;>Spoilers</span>`;
@@ -250,7 +254,7 @@ function numPages(count)
             </div>
           </article>`
       }
-      console.log(review);
+      console.log("Last review",review);
       current_timestamp = review.timestamp;
   }
 </script>
