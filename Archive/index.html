@@ -6,7 +6,6 @@
     <title>readit: a community-curated bookshelf</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
     <nav class="navbar" role="navigation" aria-label="main navigation">
@@ -55,10 +54,7 @@
       <h1 class="title">
         Top reviews
       </h1>
-      <div class="column ml-6">
-        <a class="fa fa-angle-double-left mr-6" style="font-size:24px" href="javascript:prevPage()" id="btn_prev"></a>
-        <a class="fa fa-angle-double-right" style="font-size:24px" href="javascript:nextPage()" id="btn_next"></a>
-      </div>
+
       <div id="review-list"> 
 
 
@@ -84,9 +80,6 @@
 </html>
 
 <script>
-  var data;
-  var current_page = 1;
-
   window.onload = function() {
     callGET();
   };
@@ -106,93 +99,38 @@
     
     fetch("https://ymzw4hyvpe.execute-api.us-east-1.amazonaws.com/prod", requestOptions)
       .then((resp) => resp.json())
-      .then(parsed => changePage(1, parsed))
+      .then(data => displayReviews(data))
       .catch(error => console.log('error', error));
   }
 
-  function prevPage()
-{
-    if (current_page > 1) {
-        current_page--;
-        changePage(current_page, data);
-    }
-}
+  function updateVote(title,isbn,genre,review_title,review,spoilers,NSFW,vote_count) {
+    // instantiate a headers object
+    var myHeaders = new Headers();
+      // add content type header to object
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append('access-control-allow-origin', '*');
+      myHeaders.append('access-control-allow-methods', 'POST');
 
-function nextPage()
-{
-    if (current_page < numPages(data)) {
-        current_page++;
-        console.log(data);
-        changePage(current_page, data);
-    }
-}
+      // using built in JSON utility package turn object to string and store in a variable
+      var raw = JSON.stringify({"book_title":title,"ISBN":isbn,"genres":genre,"review_title":review_title,"review":review,"contains_spoilers":spoilers,"NSFW_content":NSFW, "upvotes":vote_count});
+      // create a JSON object with parameters for API call and store in a variable
+      var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: raw,
+          redirect: 'follow'
+      };
+      // make API call with parameters and use promises to get response
+      fetch("https://txmu2exmsh.execute-api.us-east-1.amazonaws.com/dev", requestOptions)
+      .then(response => response.text())
+      .then(()=>window.location = "./index.html")
+      .catch(error => console.log('error', error));
+  }
 
-function changePage(page, reviews)
-{
-
-    // Validate page
-    if (page < 1) page = 1;
-    if (page > numPages(reviews)) page = numPages();
-
-    displayReviews(reviews, page);
-
-    if (page == 1) {
-        btn_prev.style.visibility = "hidden";
-    } else {
-        btn_prev.style.visibility = "visible";
-    }
-
-    if (page == numPages(reviews)) {
-        btn_next.style.visibility = "hidden";
-    } else {
-        btn_next.style.visibility = "visible";
-    }
-
-    data = reviews;
-    // console.log(data);
-}
-
-function numPages(reviews)
-{
-    return Math.ceil(reviews.body.length / 5);
-}
-
-// function upVote() {
-//     updateVote(vote_count+1);
-// }
-
-// function updateVote(title,isbn,genre,review_title,review,spoilers,NSFW,vote_count,timestamp) {
-//     // instantiate a headers object
-//     var myHeaders = new Headers();
-//       // add content type header to object
-//       myHeaders.append("Content-Type", "application/json");
-//       myHeaders.append('access-control-allow-origin', '*');
-//       myHeaders.append('access-control-allow-methods', 'POST');
-
-//       // using built in JSON utility package turn object to string and store in a variable
-//       var raw = JSON.stringify({"book_title":title,"ISBN":isbn,"genres":genre,"review_title":review_title,"review":review,"contains_spoilers":spoilers,"NSFW_content":NSFW, "upvotes":vote_count});
-//       // create a JSON object with parameters for API call and store in a variable
-//       var requestOptions = {
-//           method: 'POST',
-//           headers: myHeaders,
-//           body: raw,
-//           redirect: 'follow'
-//       };
-//       // make API call with parameters and use promises to get response
-//       fetch(`https://txmu2exmsh.execute-api.us-east-1.amazonaws.com/dev?=${timestamp}`, requestOptions)
-//       .then(response => response.text())
-//       .then(()=>window.location = "./index.html")
-//       .catch(error => console.log('error', error));
-//   }
-
-  function displayReviews(reviews, page) {
+  function displayReviews(reviews) {
       var div = document.getElementById('review-list')
 
-      div.innerHTML = "";
-      // console.log("reviews in display", reviews);
-      for(var i = (page-1) * 5; i < (page * 5) && i < reviews.body.length; i++) {
-        let review = reviews.body[i];
-        // console.log(reviews.body[i]);
+      reviews.body.forEach(function(review) {
         let NSFWContentTag, spoilerTag;
         NSFWContentTag = review.NSFW_content ? `<span class="tag is-danger">NSFW</span>` : `<span class="tag is-danger" style='display: none;'>NSFW</span>`;
         spoilerTag = review.contains_spoilers ? `<span class="tag is-black">Spoilers</span>` : `<span class="tag is-black" style='display: none;>Spoilers</span>`;
@@ -224,6 +162,6 @@ function numPages(reviews)
               ${spoilerTag}
             </div>
           </article>`
-      }
+      })
   }
 </script>
