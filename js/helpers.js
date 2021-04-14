@@ -38,10 +38,15 @@ const verifyJWT = async (jwt) => {
     headers: myHeaders,
   };
   let response = await fetch(CONSTANTS.READIT_AUTH_URL, requestOptions)
-  let data = await response.json();
-  console.log('VerifyJWT: ', data);
+  let authenticated = await response.json();
+  console.log('VerifyJWT: ', authenticated);
 
-  return data;
+  if (!authenticated) {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('email');
+  }
+
+  return authenticated;
 }
 
 const signOut = () => {
